@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bateria & Acompanhamento Pocket</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e24;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #2a2a35;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        button {
+            background-color: #ff5722;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 20px 0;
+            width: 100%;
+        }
+        button:active { background-color: #e64a19; }
+        .control-group { margin: 20px 0; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; }
+        input[type="range"] { width: 100%; }
+        .status { color: #4caf50; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Bateria & Ritmos v1.0</h2>
+    <p>Teste de Acompanhamento (Violão)</p>
+
+    <button id="btn-play">▶ DAR PLAY</button>
+
+    <div class="control-group">
+        <label for="bpm-slider">BPM: <span id="bpm-val">120</span></label>
+        <input type="range" id="bpm-slider" min="60" max="180" value="120">
+    </div>
+
+    <p>Status: <span id="status" class="status">Parado</span></p>
+</div>
+
+<script>
+    // Configurações Globais
+    const audioUrl = 'https://actions.google.com/sounds/v1/science_fiction/ambient_space_machine.ogg'; // Áudio de teste padrão
+    // DICA: Substitua a URL acima pelo link do SEU áudio de violão/bateria (hospedado no próprio GitHub, ex: 'audios/violao.mp3')
+
+    let audioContext;
+    let audioBuffer;
+    let audioNode;
+    let isPlaying = false;
+    let bpmOriginal = 120; // Defina qual é o BPM original do seu arquivo de áudio
+    let currentBpm = 120;
+
+    const btnPlay = document.getElementById('btn-play');
+    const bpmSlider = document.getElementById('bpm-slider');
+    const bpmVal = document.getElementById('bpm-val');
+    const statusText = document.getElementById('status');
+
+    // Inicializa a Web Audio API (precisa de clique do usuário)
+    async function initAudio() {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (!audioBuffer) {
+            statusText.innerText = "Carregando áudio...";
+            const response = await fetch(audioUrl);
+            const arrayBuffer = await response.arrayBuffer();
+            audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            statusText.innerText = "Pronto para tocar!";
+        }
+    }
+
+    function tocarLoop() {
+        if (isPlaying) return;
+
+        // Se o contexto foi pausado pelo navegador (comum no mobile)
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+
+        // Cria a fonte de áudio
+        audioNode = audioContext.createBufferSource();
+        audioNode.buffer = audioBuffer;
+        audioNode.loop = true; // Ativa o Loop contínuo
+
+        // Conecta ao alto-falante
+        audioNode.connect(audioContext.destination);
+
+        // Ajusta a velocidade inicial baseado no BPM
+        ajustarVelocidade();
+
+        audioNode.start(0);
+        isPlaying = true;
+        btnPlay.innerText = "⏸ PAUSAR";
+        statusText.innerText = "Tocando...";
+    }
+
+    function pararLoop() {
+        if (!isPlaying) return;
+        audioNode.stop();
+        audioNode.disconnect();
+        isPlaying = false;
+        btnPlay.innerText = "▶ DAR PLAY";
+        statusText.innerText = "Parado";
+    }
+
+    function ajustarVelocidade() {
+        if (!audioNode) return;
+        // A mágica do BPM no Frontend: calculamos a razão de mudança de velocidade
+        // Se o áudio é 120 BPM e queremos 60 BPM, o playbackRate será 0.5 (metade da velocidade)
+        let taxaVelocidade = currentBpm / bpmOriginal;
+        audioNode.playbackRate.value = taxaVelocidade;
+    }
+
+    // Eventos
+    btnPlay.addEventListener('click', async () => {
+        await initAudio();
+        if (isPlaying) {
+            pararLoop();
+        } else {
+            tocarLoop();
+        }
+    });
+
+    bpmSlider.addEventListener('input', (e) => {
+        currentBpm = parseInt(e.target.value);
+        bpmVal.innerText = currentBpm;
+        ajustarVelocidade();
+    });
+</script>
+
+</body>
+</html>
