@@ -3,148 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bateria com Ritmos v1.0</title>
+    <title>Mixer Multipista v1.0</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #1e1e24;
-            color: #fff;
-            text-align: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121214;
+            color: #e1e1e6;
+            margin: 0;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
-            background: #2a2a35;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        button {
-            background-color: #ff5722;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin: 20px 0;
+        .mixer-container {
             width: 100%;
+            max-width: 500px;
+            background: #1a1a1e;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            border: 1px solid #29292e;
         }
-        button:active { background-color: #e64a19; }
-        .control-group { margin: 20px 0; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; }
-        input[type="range"] { width: 100%; }
-        .status { color: #4caf50; font-weight: bold; word-break: break-all; }
+        h2 { text-align: center; margin-top: 0; color: #04d361; }
+        
+        /* Controles Principais */
+        .master-controls {
+            background: #202024;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .btn-main {
+            background: #04d361;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        .btn-main:active { filter: brightness(0.9); }
+        .slider-group { margin: 10px 0; }
+        .slider-group label { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; }
+        input[type="range"] { width: 100%; height: 6px; background: #29292e; border-radius: 3px; outline: none; }
+
+        /* Estilo das Faixas (Tracks) */
+        .track {
+            background: #202024;
+            border-left: 4px solid #ff9000;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+        .track-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .track-title { font-weight: bold; color: #ff9000; }
+        .track-controls { display: flex; gap: 10px; align-items: center; }
+        .btn-mute {
+            background: #29292e;
+            color: #a8a8b3;
+            border: 1px solid #323238;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-mute.active { background: #df4646; color: #fff; }
+        
+        .status-bar { text-align: center; font-size: 13px; color: #87868b; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Bateria com Ritmos v1.0</h2>
-    <p>Teste de Acompanhamento (Violão)</p>
-
-    <button id="btn-play">▶ DAR PLAY</button>
-
-    <div class="control-group">
-        <label for="bpm-slider">BPM: <span id="bpm-val">120</span></label>
-        <input type="range" id="bpm-slider" min="60" max="180" value="120">
+<div class="mixer-container">
+    <h2>🎛️ Mixer Multipista</h2>
+    
+    <!-- Controles Master -->
+    <div class="master-controls">
+        <button id="btn-play" class="btn-main">▶ DISPARAR TODAS AS FAIXAS</button>
+        <div class="slider-group">
+            <label><span>BPM Master:</span> <span id="bpm-val">120</span></label>
+            <input type="range" id="bpm-slider" min="60" max="180" value="120">
+        </div>
     </div>
 
-    <p>Status: <span id="status" class="status">Parado</span></p>
+    <!-- Lista de Faixas (Tracks) -->
+    <div id="tracks-list">
+        <!-- Faixa 1: Violão -->
+        <div class="track">
+            <div class="track-header">
+                <span class="track-title">🎸 Faixa 1: Violão de Acompanhamento</span>
+                <button class="btn-mute" id="mute-t1">MUTE</button>
+            </div>
+            <div class="slider-group">
+                <label><span>Volume:</span></label>
+                <input type="range" id="vol-t1" min="0" max="100" value="80">
+            </div>
+        </div>
+
+        <!-- Espaço reservado para as próximas faixas que você quiser colocar -->
+        <div class="track" style="border-left-color: #04d361; opacity: 0.5;">
+            <div class="track-header">
+                <span class="track-title">🥁 Faixa 2: Bateria (Desativada)</span>
+                <button class="btn-mute" disabled>MUTE</button>
+            </div>
+            <div class="slider-group">
+                <input type="range" disabled value="0">
+            </div>
+        </div>
+    </div>
+
+    <div class="status-bar">Status: <span id="status" style="color: #04d361;">Pronto</span></div>
 </div>
 
 <script>
-    // Usando encodeURIComponent para que o navegador consiga ler os espaços e acentos do nome gigante corretamente
-    const nomeDoArquivo = "Acompanhamento para violão  Pop Rock - Neris do Forró (youtube).mp3";
-    const audioUrl = "./" + encodeURIComponent(nomeDoArquivo);
+    const nomeArquivoT1 = "Acompanhamento para violão  Pop Rock - Neris do Forró (youtube).mp3";
+    const urlT1 = "./" + encodeURIComponent(nomeArquivoT1);
 
-    let audioContext;
-    let audioBuffer;
-    let audioNode;
+    let audioCtx;
+    let bufferT1;
+    let sourceT1;
+    let gainNodeT1; // Controle de volume da faixa 1
+    
     let isPlaying = false;
-    let bpmOriginal = 120; 
+    let isMutedT1 = false;
+    let bpmOriginal = 120;
     let currentBpm = 120;
 
     const btnPlay = document.getElementById('btn-play');
     const bpmSlider = document.getElementById('bpm-slider');
     const bpmVal = document.getElementById('bpm-val');
     const statusText = document.getElementById('status');
+    
+    const volSliderT1 = document.getElementById('vol-t1');
+    const btnMuteT1 = document.getElementById('mute-t1');
 
-    async function initAudio() {
-        if (!audioContext) {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    async function carregarFaixas() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
-        if (!audioBuffer) {
-            statusText.style.color = "#4caf50";
-            statusText.innerText = "Carregando áudio...";
+        if (!bufferT1) {
+            statusText.innerText = "Carregando trilhas no mixer...";
             try {
-                // Buscando o arquivo de forma segura
-                const response = await fetch(audioUrl);
-                
-                if (!response.ok) {
-                    throw new Error("Código " + response.status + ": Arquivo não encontrado. Verifique se o nome no repositório está idêntico.");
-                }
-                
-                const arrayBuffer = await response.arrayBuffer();
-                audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-                statusText.innerText = "Áudio carregado! Pronto para tocar.";
-            } catch (erro) {
-                statusText.style.color = "#ff3333";
-                statusText.innerText = "Erro: " + erro.message;
-                console.error(erro);
+                const res = await fetch(urlT1);
+                if (!res.ok) throw new Error("Erro ao buscar arquivo.");
+                const arrayBuf = await res.創arrayBuffer();
+                bufferT1 = await audioCtx.decodeAudioData(arrayBuf);
+                statusText.innerText = "Mixer pronto para reprodução!";
+            } catch (e) {
+                statusText.innerText = "Erro ao carregar faixas.";
+                statusText.style.color = "#df4646";
             }
         }
     }
 
-    function tocarLoop() {
-        if (isPlaying || !audioBuffer) return;
+    function darPlay() {
+        if (isPlaying) return;
 
-        if (audioContext.state === 'suspended') {
-            audioContext.resume();
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
         }
 
-        audioNode = audioContext.createBufferSource();
-        audioNode.buffer = audioBuffer;
-        audioNode.loop = true;
+        // Criando os nós de áudio da Faixa 1
+        sourceT1 = audioCtx.createBufferSource();
+        sourceT1.buffer = bufferT1;
+        sourceT1.loop = true;
 
-        audioNode.connect(audioContext.destination);
-        ajustarVelocidade();
+        gainNodeT1 = audioCtx.createGain();
+        // Configura o volume inicial baseado no slider
+        gainNodeT1.gain.value = isMutedT1 ? 0 : (volSliderT1.value / 100);
 
-        audioNode.start(0);
+        // Conecta: Arquivo -> Controle de Volume -> Saída do Celular
+        sourceT1.connect(gainNodeT1);
+        gainNodeT1.connect(audioCtx.destination);
+
+        atualizarVelocidade();
+        
+        // Dispara no tempo exato 0 do relógio do sistema
+        sourceT1.start(0);
+        
         isPlaying = true;
-        btnPlay.innerText = "⏸ PAUSAR";
-        statusText.innerText = "Tocando...";
+        btnPlay.innerText = "⏸ PAUSAR MIXER";
+        btnPlay.style.background = "#ff9000";
+        statusText.innerText = "Sincronizado e tocando...";
     }
 
-    function pararLoop() {
+    function pausar() {
         if (!isPlaying) return;
-        audioNode.stop();
-        audioNode.disconnect();
+        sourceT1.stop();
+        sourceT1.disconnect();
+        gainNodeT1.disconnect();
         isPlaying = false;
-        btnPlay.innerText = "▶ DAR PLAY";
-        statusText.innerText = "Parado";
+        btnPlay.innerText = "▶ DISPARAR TODAS AS FAIXAS";
+        btnPlay.style.background = "#04d361";
+        statusText.innerText = "Mixer pausado";
     }
 
-    function ajustarVelocidade() {
-        if (!audioNode) return;
-        let taxaVelocidade = currentBpm / bpmOriginal;
-        audioNode.playbackRate.value = taxaVelocidade;
+    function atualizarVelocidade() {
+        if (!sourceT1) return;
+        sourceT1.playbackRate.value = currentBpm / bpmOriginal;
     }
 
+    // Eventos dos Controles Gerais
     btnPlay.addEventListener('click', async () => {
-        await initAudio();
+        await carregarFaixas();
         if (isPlaying) {
-            pararLoop();
+            pausar();
         } else {
-            tocarLoop();
+            if (bufferT1) darPlay();
         }
     });
 
     bpmSlider.addEventListener('input', (e) => {
         currentBpm = parseInt(e.target.value);
         bpmVal.innerText = currentBpm;
-        ajustarVelocidade();
+        atualizarVelocidade();
+    });
+
+    // Eventos de Controle da Faixa 1 (Violão)
+    volSliderT1.addEventListener('input', (e) => {
+        if (!gainNodeT1 || isMutedT1) return;
+        gainNodeT1.gain.value = e.target.value / 100;
+    });
+
+    btnMuteT1.addEventListener('click', () => {
+        isMutedT1 = !isMutedT1;
+        btnMuteT1.classList.toggle('active', isMutedT1);
+        if (gainNodeT1) {
+            gainNodeT1.gain.value = isMutedT1 ? 0 : (volSliderT1.value / 100);
+        }
     });
 </script>
 
