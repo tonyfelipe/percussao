@@ -3,244 +3,300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mixer Multipista v1.0</title>
+    <title>Estúdio Multipista Profissional</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121214;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #141419;
             color: #e1e1e6;
             margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            padding: 10px;
         }
-        .mixer-container {
-            width: 100%;
-            max-width: 500px;
-            background: #1a1a1e;
+        .studio-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #1a1a22;
             border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-            border: 1px solid #29292e;
-        }
-        h2 { text-align: center; margin-top: 0; color: #04d361; }
-        
-        /* Controles Principais */
-        .master-controls {
-            background: #202024;
             padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
         }
-        .btn-main {
+        h2 { text-align: center; color: #04d361; margin-top: 0; font-size: 20px; }
+        
+        /* Painel Superior */
+        .master-panel {
+            background: #20202c;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        .btn-play {
             background: #04d361;
             color: #000;
             border: none;
-            padding: 12px 24px;
-            font-size: 16px;
+            padding: 12px 20px;
+            font-size: 14px;
             font-weight: bold;
             border-radius: 6px;
             cursor: pointer;
-            width: 100%;
-            margin-bottom: 15px;
+            flex: 1;
         }
-        .btn-main:active { filter: brightness(0.9); }
-        .slider-group { margin: 10px 0; }
-        .slider-group label { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; }
-        input[type="range"] { width: 100%; height: 6px; background: #29292e; border-radius: 3px; outline: none; }
+        .bpm-container { flex: 1; display: flex; flex-direction: column; font-size: 13px; }
 
-        /* Estilo das Faixas (Tracks) */
-        .track {
-            background: #202024;
-            border-left: 4px solid #ff9000;
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 12px;
-        }
-        .track-header {
+        /* Grade do Editor (Layout estilo Foto) */
+        .track-timeline {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: #1f1f29;
+            border-radius: 6px;
             margin-bottom: 10px;
+            overflow: hidden;
+            border: 1px solid #2d2d3d;
+            height: 90px;
         }
-        .track-title { font-weight: bold; color: #ff9000; }
-        .track-controls { display: flex; gap: 10px; align-items: center; }
-        .btn-mute {
-            background: #29292e;
-            color: #a8a8b3;
-            border: 1px solid #323238;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        .btn-mute.active { background: #df4646; color: #fff; }
         
-        .status-bar { text-align: center; font-size: 13px; color: #87868b; margin-top: 15px; }
+        /* Regulador Lateral Esquerdo */
+        .track-controls-left {
+            width: 110px;
+            background: #252535;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-right: 2px solid #141419;
+        }
+        .track-title { font-size: 11px; font-weight: bold; color: #ff9000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .volume-container { display: flex; align-items: center; gap: 5px; }
+        .volume-container span { font-size: 10px; color: #a8a8b3; }
+        .vol-slider-vertical { flex: 1; height: 5px; background: #323245; }
+        .btn-mute { background: #323245; color: #fff; border: none; font-size: 10px; padding: 3px; border-radius: 3px; cursor: pointer; }
+        .btn-mute.active { background: #df4646; }
+
+        /* Espaço da Trilha na Direita */
+        .track-wave-right {
+            flex: 1;
+            position: relative;
+            background: #181820;
+        }
+        canvas { width: 100%; height: 100%; display: block; }
+        
+        /* Linha que corre indicando onde a música está */
+        .playhead {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 100%;
+            background: #04d361;
+            box-shadow: 0 0 8px #04d361;
+            pointer-events: none;
+        }
+        
+        .status { text-align: center; font-size: 12px; color: #87868b; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<div class="mixer-container">
-    <h2>🎛️ Mixer Multipista</h2>
+<div class="studio-container">
+    <h2>🎛️ Estúdio Multipista v2.0</h2>
     
-    <!-- Controles Master -->
-    <div class="master-controls">
-        <button id="btn-play" class="btn-main">▶ DISPARAR TODAS AS FAIXAS</button>
-        <div class="slider-group">
-            <label><span>BPM Master:</span> <span id="bpm-val">120</span></label>
-            <input type="range" id="bpm-slider" min="60" max="180" value="120">
+    <div class="master-panel">
+        <button id="btn-main-play" class="btn-play">▶ DISPARAR MASTER</button>
+        <div class="bpm-container">
+            <label><b>BPM: <span id="bpm-txt">120</span></b></label>
+            <input type="range" id="master-bpm" min="60" max="180" value="120">
         </div>
     </div>
 
-    <!-- Lista de Faixas (Tracks) -->
-    <div id="tracks-list">
-        <!-- Faixa 1: Violão -->
-        <div class="track">
-            <div class="track-header">
-                <span class="track-title">🎸 Faixa 1: Violão de Acompanhamento</span>
+    <div id="timeline-editor">
+        
+        <div class="track-timeline">
+            <div class="track-controls-left">
+                <span class="track-title" style="color: #ff9000;">🎸 Violão</span>
+                <div class="volume-container">
+                    <span>🎚️</span>
+                    <input type="range" id="vol-t1" class="vol-slider-vertical" min="0" max="100" value="80">
+                </div>
                 <button class="btn-mute" id="mute-t1">MUTE</button>
             </div>
-            <div class="slider-group">
-                <label><span>Volume:</span></label>
-                <input type="range" id="vol-t1" min="0" max="100" value="80">
+            <div class="track-wave-right">
+                <canvas id="canvas-t1"></canvas>
+                <div class="playhead" id="playhead-t1"></div>
             </div>
         </div>
 
-        <!-- Espaço reservado para as próximas faixas que você quiser colocar -->
-        <div class="track" style="border-left-color: #04d361; opacity: 0.5;">
-            <div class="track-header">
-                <span class="track-title">🥁 Faixa 2: Bateria (Desativada)</span>
+        <div class="track-timeline" style="opacity: 0.4;">
+            <div class="track-controls-left">
+                <span class="track-title" style="color: #04d361;"> drum_kick.mp3</span>
+                <div class="volume-container">
+                    <span>🎚️</span>
+                    <input type="range" class="vol-slider-vertical" disabled value="0">
+                </div>
                 <button class="btn-mute" disabled>MUTE</button>
             </div>
-            <div class="slider-group">
-                <input type="range" disabled value="0">
+            <div class="track-wave-right">
+                <canvas id="canvas-t2"></canvas>
             </div>
         </div>
+
     </div>
 
-    <div class="status-bar">Status: <span id="status" style="color: #04d361;">Pronto</span></div>
+    <div class="status">Status: <span id="status-msg" style="color: #ff9000;">Aguardando Comando...</span></div>
 </div>
 
 <script>
-    const nomeArquivoT1 = "Acompanhamento para violão  Pop Rock - Neris do Forró (youtube).mp3";
-    const urlT1 = "./" + encodeURIComponent(nomeArquivoT1);
+    // Usando o nome correto e simples que combinamos
+    const audioUrl = "./Acompanhamento para violão  Pop Rock - Neris do Forró (youtube).mp3";
 
     let audioCtx;
-    let bufferT1;
-    let sourceT1;
-    let gainNodeT1; // Controle de volume da faixa 1
+    let audioBuffer;
+    let sourceNode;
+    let gainNode;
     
     let isPlaying = false;
-    let isMutedT1 = false;
-    let bpmOriginal = 120;
+    let isMuted = false;
     let currentBpm = 120;
-
-    const btnPlay = document.getElementById('btn-play');
-    const bpmSlider = document.getElementById('bpm-slider');
-    const bpmVal = document.getElementById('bpm-val');
-    const statusText = document.getElementById('status');
+    const bpmOriginal = 120;
     
-    const volSliderT1 = document.getElementById('vol-t1');
-    const btnMuteT1 = document.getElementById('mute-t1');
+    let animationId;
+    let startTime = 0;
+    let pausedTime = 0;
 
-    async function carregarFaixas() {
+    const btnPlay = document.getElementById('btn-main-play');
+    const bpmSlider = document.getElementById('master-bpm');
+    const bpmTxt = document.getElementById('bpm-txt');
+    const statusMsg = document.getElementById('status-msg');
+    
+    const volSlider = document.getElementById('vol-t1');
+    const btnMute = document.getElementById('mute-t1');
+    const playhead = document.getElementById('playhead-t1');
+    const canvas = document.getElementById('canvas-t1');
+    const ctx = canvas.getContext('2d');
+
+    // Desenha uma onda sonora estática de fundo para simular o editor profissional
+    function desenharOndaEstatica() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = 90;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#224466';
+        
+        // Gera barras simulando os picos da música
+        for (let i = 0; i < canvas.width; i += 3) {
+            let acento = Math.sin(i * 0.05) * 15;
+            let altura = Math.abs(Math.cos(i * 0.1) * 25) + 5 + acento;
+            ctx.fillRect(i, (canvas.height / 2) - (altura / 2), 2, altura);
+        }
+    }
+
+    async function carregarAudio() {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
-        if (!bufferT1) {
-            statusText.innerText = "Carregando trilhas no mixer...";
+        if (!audioBuffer) {
+            statusMsg.innerText = "Baixando trilha para o Deck...";
             try {
-                const res = await fetch(urlT1);
-                if (!res.ok) throw new Error("Erro ao buscar arquivo.");
-                const arrayBuf = await res.創arrayBuffer();
-                bufferT1 = await audioCtx.decodeAudioData(arrayBuf);
-                statusText.innerText = "Mixer pronto para reprodução!";
-            } catch (e) {
-                statusText.innerText = "Erro ao carregar faixas.";
-                statusText.style.color = "#df4646";
+                const response = await fetch(audioUrl);
+                if (!response.ok) throw new Error("Erro de conexão com o arquivo.");
+                const arrayBuffer = await response.arrayBuffer();
+                audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+                statusMsg.innerText = "Deck carregado com sucesso!";
+                desenharOndaEstatica();
+            } catch (err) {
+                statusMsg.innerText = "Erro ao carregar arquivo de áudio.";
+                statusMsg.style.color = "#df4646";
             }
         }
     }
 
-    function darPlay() {
-        if (isPlaying) return;
+    function iniciarReproducao() {
+        sourceNode = audioCtx.createBufferSource();
+        sourceNode.buffer = audioBuffer;
+        sourceNode.loop = true;
 
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
+        gainNode = audioCtx.createGain();
+        gainNode.gain.value = isMuted ? 0 : (volSlider.value / 100);
 
-        // Criando os nós de áudio da Faixa 1
-        sourceT1 = audioCtx.createBufferSource();
-        sourceT1.buffer = bufferT1;
-        sourceT1.loop = true;
+        sourceNode.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
 
-        gainNodeT1 = audioCtx.createGain();
-        // Configura o volume inicial baseado no slider
-        gainNodeT1.gain.value = isMutedT1 ? 0 : (volSliderT1.value / 100);
+        atualizarTempoBpm();
 
-        // Conecta: Arquivo -> Controle de Volume -> Saída do Celular
-        sourceT1.connect(gainNodeT1);
-        gainNodeT1.connect(audioCtx.destination);
-
-        atualizarVelocidade();
-        
-        // Dispara no tempo exato 0 do relógio do sistema
-        sourceT1.start(0);
+        // Controle de tempo para a linha andante
+        startTime = audioCtx.currentTime - pausedTime;
+        sourceNode.start(0, pausedTime % audioBuffer.duration);
         
         isPlaying = true;
-        btnPlay.innerText = "⏸ PAUSAR MIXER";
+        btnPlay.innerText = "⏸ PAUSAR MEU ESTÚDIO";
         btnPlay.style.background = "#ff9000";
-        statusText.innerText = "Sincronizado e tocando...";
+        statusMsg.innerText = "Estúdio em execução.";
+        
+        atualizarLinhaDoTempo();
     }
 
-    function pausar() {
+    function pausarReproducao() {
         if (!isPlaying) return;
-        sourceT1.stop();
-        sourceT1.disconnect();
-        gainNodeT1.disconnect();
+        cancelAnimationFrame(animationId);
+        pausedTime = audioCtx.currentTime - startTime;
+        sourceNode.stop();
+        sourceNode.disconnect();
+        gainNode.disconnect();
         isPlaying = false;
-        btnPlay.innerText = "▶ DISPARAR TODAS AS FAIXAS";
+        btnPlay.innerText = "▶ DISPARAR MASTER";
         btnPlay.style.background = "#04d361";
-        statusText.innerText = "Mixer pausado";
+        statusMsg.innerText = "Estúdio pausado.";
     }
 
-    function atualizarVelocidade() {
-        if (!sourceT1) return;
-        sourceT1.playbackRate.value = currentBpm / bpmOriginal;
+    function atualizarTempoBpm() {
+        if (!sourceNode) return;
+        sourceNode.playbackRate.value = currentBpm / bpmOriginal;
     }
 
-    // Eventos dos Controles Gerais
+    // Faz a linha verde andar na horizontal proporcionalmente ao áudio
+    function atualizarLinhaDoTempo() {
+        if (!isPlaying || !audioBuffer) return;
+        
+        let tempoPassado = audioCtx.currentTime - startTime;
+        let progresso = (tempoPassado % (audioBuffer.duration / (currentBpm / bpmOriginal))) / (audioBuffer.duration / (currentBpm / bpmOriginal));
+        
+        let posicaoPixels = progresso * canvas.width;
+        playhead.style.left = posicaoPixels + "px";
+        
+        animationId = requestAnimationFrame(atualizarLinhaDoTempo);
+    }
+
     btnPlay.addEventListener('click', async () => {
-        await carregarFaixas();
+        await carregarAudio();
         if (isPlaying) {
-            pausar();
+            pausarReproducao();
         } else {
-            if (bufferT1) darPlay();
+            if (audioBuffer) iniciarReproducao();
         }
     });
 
     bpmSlider.addEventListener('input', (e) => {
         currentBpm = parseInt(e.target.value);
-        bpmVal.innerText = currentBpm;
-        atualizarVelocidade();
+        bpmTxt.innerText = currentBpm;
+        atualizarTempoBpm();
     });
 
-    // Eventos de Controle da Faixa 1 (Violão)
-    volSliderT1.addEventListener('input', (e) => {
-        if (!gainNodeT1 || isMutedT1) return;
-        gainNodeT1.gain.value = e.target.value / 100;
+    volSlider.addEventListener('input', (e) => {
+        if (!gainNode || isMuted) return;
+        gainNode.gain.value = e.target.value / 100;
     });
 
-    btnMuteT1.addEventListener('click', () => {
-        isMutedT1 = !isMutedT1;
-        btnMuteT1.classList.toggle('active', isMutedT1);
-        if (gainNodeT1) {
-            gainNodeT1.gain.value = isMutedT1 ? 0 : (volSliderT1.value / 100);
+    btnMute.addEventListener('click', () => {
+        isMuted = !isMuted;
+        btnMute.classList.toggle('active', isMuted);
+        if (gainNode) {
+            gainNode.gain.value = isMuted ? 0 : (volSlider.value / 100);
         }
     });
+
+    // Ajusta o desenho se virar a tela do celular
+    window.addEventListener('resize', desenharOndaEstatica);
+    setTimeout(desenharOndaEstatica, 500);
 </script>
 
 </body>
