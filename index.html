@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bateria & Acompanhamento Pocket</title>
+    <title>Bateria & Ritmos v1.0</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -35,7 +35,7 @@
         .control-group { margin: 20px 0; }
         label { display: block; margin-bottom: 8px; font-weight: bold; }
         input[type="range"] { width: 100%; }
-        .status { color: #4caf50; font-weight: bold; }
+        .status { color: #4caf50; font-weight: bold; word-break: break-all; }
     </style>
 </head>
 <body>
@@ -55,15 +55,15 @@
 </div>
 
 <script>
-    // Configurações Globais
-    const audioUrl = 'Acompanhamento para violão  Pop Rock - Neris do Forró (youtube).mp3'; // Áudio de teste padrão
-    // DICA: Substitua a URL acima pelo link do SEU áudio de violão/bateria (hospedado no próprio GitHub, ex: 'audios/violao.mp3')
+    // Usando encodeURIComponent para que o navegador consiga ler os espaços e acentos do nome gigante corretamente
+    const nomeDoArquivo = "Acompanhamento para violão  Pop Rock - Neris do Forró (youtube).mp3";
+    const audioUrl = "./" + encodeURIComponent(nomeDoArquivo);
 
     let audioContext;
     let audioBuffer;
     let audioNode;
     let isPlaying = false;
-    let bpmOriginal = 120; // Defina qual é o BPM original do seu arquivo de áudio
+    let bpmOriginal = 120; 
     let currentBpm = 120;
 
     const btnPlay = document.getElementById('btn-play');
@@ -71,37 +71,44 @@
     const bpmVal = document.getElementById('bpm-val');
     const statusText = document.getElementById('status');
 
-    // Inicializa a Web Audio API (precisa de clique do usuário)
     async function initAudio() {
         if (!audioContext) {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
         }
         if (!audioBuffer) {
+            statusText.style.color = "#4caf50";
             statusText.innerText = "Carregando áudio...";
-            const response = await fetch(audioUrl);
-            const arrayBuffer = await response.arrayBuffer();
-            audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-            statusText.innerText = "Pronto para tocar!";
+            try {
+                // Buscando o arquivo de forma segura
+                const response = await fetch(audioUrl);
+                
+                if (!response.ok) {
+                    throw new Error("Código " + response.status + ": Arquivo não encontrado. Verifique se o nome no repositório está idêntico.");
+                }
+                
+                const arrayBuffer = await response.arrayBuffer();
+                audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                statusText.innerText = "Áudio carregado! Pronto para tocar.";
+            } catch (erro) {
+                statusText.style.color = "#ff3333";
+                statusText.innerText = "Erro: " + erro.message;
+                console.error(erro);
+            }
         }
     }
 
     function tocarLoop() {
-        if (isPlaying) return;
+        if (isPlaying || !audioBuffer) return;
 
-        // Se o contexto foi pausado pelo navegador (comum no mobile)
         if (audioContext.state === 'suspended') {
             audioContext.resume();
         }
 
-        // Cria a fonte de áudio
         audioNode = audioContext.createBufferSource();
         audioNode.buffer = audioBuffer;
-        audioNode.loop = true; // Ativa o Loop contínuo
+        audioNode.loop = true;
 
-        // Conecta ao alto-falante
         audioNode.connect(audioContext.destination);
-
-        // Ajusta a velocidade inicial baseado no BPM
         ajustarVelocidade();
 
         audioNode.start(0);
@@ -121,13 +128,10 @@
 
     function ajustarVelocidade() {
         if (!audioNode) return;
-        // A mágica do BPM no Frontend: calculamos a razão de mudança de velocidade
-        // Se o áudio é 120 BPM e queremos 60 BPM, o playbackRate será 0.5 (metade da velocidade)
         let taxaVelocidade = currentBpm / bpmOriginal;
         audioNode.playbackRate.value = taxaVelocidade;
     }
 
-    // Eventos
     btnPlay.addEventListener('click', async () => {
         await initAudio();
         if (isPlaying) {
